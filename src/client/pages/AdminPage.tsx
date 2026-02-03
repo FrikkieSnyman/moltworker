@@ -109,6 +109,12 @@ export default function AdminPage() {
     
     setRestartInProgress(true)
     try {
+      const syncResult = await handleSync();
+      if (!syncResult || !syncResult.success) {
+        setError(syncResult?.error || 'Failed to backup before restart')
+        setRestartInProgress(false)
+        return
+      }
       const result = await restartGateway()
       if (result.success) {
         setError(null)
@@ -135,6 +141,7 @@ export default function AdminPage() {
       } else {
         setError(result.error || 'Sync failed')
       }
+      return result
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to sync')
     } finally {
